@@ -8,10 +8,19 @@ class Game
 {renderComponent, createClass} = React
 
 Game = createClass
-  getInitialState: ->
+  componentWillMount: ->
+    @props.onValue (data) ->
+      @setState({dataTaken: true})
+      @setState(data)
 
+  getInitialState: ->
+    return {
+      dataTaken: false
+    }
   render: ->
     game = @props.game.get()
+
+    return `<div>Loading...</div>` unless @state.dataTaken
 
     return `
       <div>
@@ -37,4 +46,4 @@ Tasks = createClass
 
 do ->
   game = new Game()
-  renderComponent(`<Game game={game} />`, document.getElementById('container'))
+  renderComponent(`<Game bind={game.onValue} />`, document.getElementById('container'))
