@@ -4,63 +4,41 @@ Desk = React.createClass
   propTypes:
     size: Object
     objects: Array
-
-  getWindowSizePx: ->
-    return {
-      width: window.innerWidth
-      height: window.innerHeight
-    }
-  handleResize: ->
-    @setState wSizePx: @getWindowSizePx()
-
-  componentWillMount: ->
-    window.addEventListener('resize', @handleResize.bind(@))
+    shadows: Array
+    deskPx: Object
+    tilePx: Object
 
   getInitialState: ->
     return {
       wSizePx: @getWindowSizePx()
+      shadows: null
     }
 
-  getSquareSizePx: (size) ->
-    {wSizePx} = @state
+  createTile: (n) ->
+    {objects, size, tilePx} = @props
+    {shadows} = @states
 
-    # todo: ...
-    return {
-      width: 0
-      height: 0
-    }
+    tyleCoords = __.getCoordsFromPoint(n, size.x)
+    object = __.getObjectByCoords(objects, tyleCoords)
 
-  getTileSize: (screenSizePx, size) ->
-    # todo: ...
-    return {
-      width: 0
-      height: 0
-    }
+#    shadowCoords = do ->
+#      if _.isEqual(tyleCoords, elephantCoords)
+#        return elephantCoords
+#      else if _.isObject(shadow)
+#        return _.pluck(shadow, 'x', 'y').value()
+#      else
+#        return shadow
 
-  getSizes: () ->
-    {size} = @props
+#    shadow.type ?= 'current' if shadowCoords?
+#    highlight = shadow.type if shadowCoords?
 
-    squareSizePx = @getSquareSizePx(size)
-    tileSizePx = @getTileSizePx(squareSizePx, size)
-
-    return {
-      square: squareSizePx
-      tile: tileSizePx
-    }
+    return `<Tile coords={tyleCoords} object={object} size={sizesPx.tile} highlight={highlight} />`
 
   render: ->
-    {objects, size} = @props
+    {size, deskPx} = @props
 
-    sizesPx = @getSizes()
-
-    tiles = _(size.x * size.y).times((n)->
-      coords = getCoordsFromPoint(n, size.x)
-      object = getObjectByCoords(objects, coords) || null
-      return `<Tile coords={coords} object={object} />`
-    )
+    tiles = _(size.x * size.y).times(@createTile.bind(@))
 
     return `
-      <div style={prepareStylesToDom(squarePx)}>
-        {tiles}
-      </div>
+    <div style={deskPx}>{tiles}</div>
     `

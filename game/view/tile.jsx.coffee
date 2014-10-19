@@ -1,22 +1,25 @@
 `/** @jsx React.DOM */`
 
+React.PropTypes.Coords = React.PropTypes.shape
+  x: Number
+  y: Number
 
 Tile = React.createClass
   propTypes:
-    coords: React.PropTypes.shape
-      x: React.PropTypes.number
-      y: React.PropTypes.number
+    highlight: String
+
+    size: Number
+
+    coords: React.PropTypes.Coords
 
     object: React.PropTypes.shape
       type: React.PropTypes.oneOf([
         'animal'
         'block'
       ])
-      img: React.PropTypes.string
-      name: React.PropTypes.string
-      coords: React.PropTypes.shape
-        x: React.PropTypes.number
-        y: React.PropTypes.number
+      img: String
+      name: String
+      coords: React.PropTypes.Coords
 
   getInitialState: ->
     return {
@@ -29,12 +32,12 @@ Tile = React.createClass
       'tile': true
       'tile-filled': @state.hasObject
       'tile-empty': not @state.hasObject
-      'is-highlight': @state.highlight
+      'is-highlight': @state.highlight?
 
-  getStyle: ->
+  getStyles: ->
     return {
-      width: 0
-      height: 0
+      width: @props.size
+      height: @props.size
     }
 
   renderObject: ->
@@ -47,10 +50,8 @@ Tile = React.createClass
     `
 
   render: ->
-    styles = __.prepareStylesToDom(this.getStyle())
-
     return `
-    <div class={this.classes()} style={styles}>
+    <div class={this.classes()} style={this.getStyles()}>
       {this.renderObject() || ''}
     </div>
     `

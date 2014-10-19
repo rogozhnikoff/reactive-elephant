@@ -2,8 +2,14 @@
 
 Elephant = React.createClass
   propTypes:
-    coords: React.PropTypes.object
-    status: React.PropTypes.oneOf(['wait', 'success', 'fail'])
+    dragElephant: Function
+    coords: Object
+    status: React.PropTypes.oneOf([
+      'wait'
+      'success'
+      'fail'
+    ])
+    sizePx: Number
 
   getInitialState: ->
     return {
@@ -11,13 +17,35 @@ Elephant = React.createClass
     }
 
   getClasses: ->
+    {status} = @props
     return React.addons.classSet
       'elephant': yes
-      'elephant-idle': @props.status is 'wait'
-      'elephant-jump': @props.status is 'success'
-      'elephant-boom': @props.status is 'fail'
+      'elephant-idle': status is 'wait'
+      'elephant-jump': status is 'success'
+      'elephant-boom': status is 'fail'
+
+  dragHandle: (ev) ->
+    type = ev.type[4..]  # start, move, end
+
+    @props.dragElephant
+      type: type
+      position: @props.getPositionOfElephant()
+
+  getStyles: ->
+    return {
+      width: @props.sizePx
+      height: @props.sizePx
+    }
 
   render: ->
     return `
-    <div class={this.getClasses()} />
+    <div
+      class={this.getClasses()}
+      styles={this.getStyles()}
+      draggable="true"
+
+      onDragStart={this.dragHandle}
+      onDragMove={this.dragHandle}
+      onDragEnd={this.dragHandle}
+      />
     `
