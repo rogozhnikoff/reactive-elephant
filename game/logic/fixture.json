@@ -1,0 +1,28 @@
+{
+    "elephant": {
+        "x": 0,
+        "y": 0,
+        "taskIndex": 0,
+        "status": "start"
+    },
+    "desk": {
+        "x": 3,
+        "y": 3,
+        "objects": [
+            {
+                "type": "animal",
+                "name": "monkey",
+                "x": 2,
+                "y": 2
+            }
+        ]
+    },
+    "tasks": [
+        "up",
+        "up",
+        "right",
+        "right",
+        "up",
+        "right"
+    ]
+}
