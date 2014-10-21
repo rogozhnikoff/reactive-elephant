@@ -6,7 +6,7 @@
       current: false
     }
     {
-      type: 'bottom'
+      type: 'down'
       visited: true
       current: false
     }
@@ -16,7 +16,7 @@
       current: true
     }
     {
-      type: 'top'
+      type: 'up'
       visited: false
       current: false
     }

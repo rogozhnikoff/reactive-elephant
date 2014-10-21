@@ -1,16 +1,13 @@
 `/** @jsx React.DOM */`
 
-React.PropTypes.Coords = React.PropTypes.shape
-  x: Number
-  y: Number
 
 Tile = React.createClass
   propTypes:
-    highlight: String
-
-    size: Number
-
-    coords: React.PropTypes.Coords
+    tilePx: Number
+    coords: React.PropTypes.arrayOf(Number)
+    highlight: React.PropTypes.shape
+      position: React.PropTypes.arrayOf(Number)
+      percent: Number
 
     object: React.PropTypes.shape
       type: React.PropTypes.oneOf([
@@ -19,7 +16,7 @@ Tile = React.createClass
       ])
       img: String
       name: String
-      coords: React.PropTypes.Coords
+      coords: React.PropTypes.arrayOf(Number)
 
   getInitialState: ->
     return {
@@ -27,7 +24,7 @@ Tile = React.createClass
       hasObject: @props.object?
     }
 
-  classes: ->
+  classSet: ->
     return React.addons.classSet
       'tile': true
       'tile-filled': @state.hasObject
@@ -35,23 +32,37 @@ Tile = React.createClass
       'is-highlight': @state.highlight?
 
   getStyles: ->
+    {tilePx, coords, highlight} = @props
+
     return {
-      width: @props.size
-      height: @props.size
+      left: coords[0] * tilePx
+      top: coords[1] * tilePx
+      width: tilePx
+      height: tilePx
+      backgroundColor: "rgba(0, 0, 0, #{(highlight.percent * .5) / 100})"
     }
 
   renderObject: ->
     {object} = @props
     return unless object?
 
-    classes = 'object object-' + object.type
-    return `
-    <img class={classes} alt={object.name} src={object.img} />
-    `
+    classSet = React.addons.classSet
+      'object': yes
+      'object-animal': object.type is 'animal'
+      'object-block': object.type is 'block'
+
+    return `<img
+        class={classSet}
+        alt={object.name}
+        src={object.img}
+        />`
 
   render: ->
-    return `
-    <div class={this.classes()} style={this.getStyles()}>
-      {this.renderObject() || ''}
-    </div>
-    `
+    object = @renderObject() || ''
+
+    return `<div
+      class={this.classSet()}
+      style={this.getStyles()}
+      >
+      {object}
+    </div>`

@@ -3,7 +3,7 @@
 Elephant = React.createClass
   propTypes:
     dragElephant: Function
-    coords: Object
+    coords: React.PropTypes.arrayOf(Number)
     status: React.PropTypes.oneOf([
       'wait'
       'success'
@@ -25,11 +25,9 @@ Elephant = React.createClass
       'elephant-boom': status is 'fail'
 
   dragHandle: (ev) ->
-    type = ev.type[4..]  # start, move, end
-
     @props.dragElephant
-      type: type
-      position: @props.getPositionOfElephant()
+      type: ev.type[4..]  # start, move, end
+      elephantEl: @getDomNode()
 
   getStyles: ->
     return {
@@ -38,14 +36,12 @@ Elephant = React.createClass
     }
 
   render: ->
-    return `
-    <div
+    return `<div
+      draggable
+
       class={this.getClasses()}
       styles={this.getStyles()}
-      draggable="true"
-
       onDragStart={this.dragHandle}
       onDragMove={this.dragHandle}
       onDragEnd={this.dragHandle}
-      />
-    `
+      />`

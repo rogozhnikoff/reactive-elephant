@@ -1,4 +1,4 @@
-__ ?= {}
+__ = {}
 
 __.prepareStylesToDom = (styles) ->
   return _(styles).reduce((acc, value, key) ->
@@ -8,15 +8,14 @@ __.prepareStylesToDom = (styles) ->
   , {})
 
 __.getCoordsFromPoint = (pos, sizeX) ->
-  return {
-  x: pos % sizeX
-  y: Math.floor(pos / sizeX)
-  }
+  return [
+      pos % sizeX
+      Math.floor(pos / sizeX)
+  ]
 
 __.getObjectByCoords = (objects, coords) ->
   return objects.find (object) ->
     return _.isEqual(object.coords, coords)
-
 
 __.getShadows = ({left, top, long}) ->
   LEFT = Math.floor(left / long)

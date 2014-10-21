@@ -1,19 +1,13 @@
 `/** @jsx React.DOM */`
 
-### где-то там...
-class Game
-  pushCoords: ->
-  onValue: ->
-###
-
 Game = React.createClass
   propTypes:
-    bind: Function
+    bind: React.PropTypes.func
+    push: React.PropTypes.func
 
   componentWillMount: ->
-    @props.bind((data) ->
-      state = _.extend({}, data, {dataTaken: yes})
-      @setState(state)
+    @props.bindTo((data) =>
+      @setState _.extend({}, data, {dataTaken: yes})
     )
 
     window.addEventListener('resize', @handleResize.bind(@))
@@ -23,22 +17,47 @@ Game = React.createClass
   getInitialState: ->
     return {
       dataTaken: no
-      shadowPosition: null
       wSizePx: @getWindowSizePx()
+
+      # fixture
+      elephant: {
+        coords: [0, 1]
+        status: ''
+      }
+      desk: {
+        size: [0, 1]
+        objects: [
+          {
+            type: 'animal' || 'block'
+            img: '<img />'
+            name: ''
+            coords: [0, 1]
+          }
+          '...'
+        ]
+      }
+      tasks: [
+        {
+          type: 'right'
+          visited: true
+          current: false
+        }
+        '...'
+      ]
+
     }
 
-  getSizes: () ->
+  getSizesPx: () ->
     {size} = @state.desk
     {wSizePx} = @state
 
-    tileSizePx = Math.min(wSizePx.height / size.y, wSizePx.width / size.x)
-
-    deskSizePx =
-      width: tileSizePx * size.x
-      height: tileSizePx * size.y
+    tileSizePx = Math.min(wSizePx.height / size[1], wSizePx.width / size[0])
 
     return {
-      desk: deskSizePx
+      desk:
+        width: tileSizePx * size[0]
+        height: tileSizePx * size[1]
+
       tile: tileSizePx
     }
 
@@ -52,56 +71,61 @@ Game = React.createClass
     @setState wSizePx: @getWindowSizePx()
     return @
 
-  dragElephant: ({type, position}) ->
+  dragElephant: ({type, elephantEl}) ->
     # should we cached this params?
     tilePx = @getSizes().tile
+    position = __.getRelativePosition(elephantEl, @refs.desk.getDOMNode())
+    shadows = __.getShadows
+      left: position.left
+      top: position.top
+      long: tilePx
 
-    @refs.desk.setState
-      shadows: __.getShadows
-        left: position.left
-        top: position.top
-        long: tilePx
+    @refs.desk.setState({shadows})
+
+    @props.push shadows[0].position if type is 'end'
 
     return @
 
-  getPositionOfElephant: ->
-    # @enh: @refs.desk.getDOMNode() can be cached, like wSizePx
-    return __.getRelativePosition(@refs.elephant.getDOMNode(), @refs.desk.getDOMNode())
+  classSet: ->
+    return React.addons.classSet
+      'container': yes
 
   render: ->
     return `<div>Loading...</div>` unless @state.dataTaken
 
-    {desk, elephant, tasks, shadowPosition, shadows} = @state
-    sizesPx = @getSizes()
+    {desk, elephant, tasks} = @state
+    sizesPx = @getSizesPx()
 
-    return `
-      <div>
+    return `<div class={this.classSet()}>
 
         <Desk
           ref='desk'
           size={desk.size}
           objects={desk.objects}
-          shadows={shadows}
           deskPx={sizesPx.desk}
           tilePx={sizesPx.tile}
           />
 
         <Elephant
-          ref='elephant'
           coords={elephant.coords}
           status={elephant.status}
           sizePx={sizesPx.tile}
           dragElephant={this.dragElephant}
-          getPositionOfElephant={this.getPositionOfElephant}
           />
 
-        <Tasks ref='tasks' model={tasks} />
+        <Tasks
+         model={tasks}
+         />
 
-      </div>
-    `
+      </div>`
 
 
+
+
+class Game
+  onValue: -> console.log('onValue')
+  pushCoords: -> console.log('pushCoords')
 
 do ->
   game = new Game()
-  React.renderComponent(`<Game bind={game.onValue} push={game.pushCoords} />`, document.getElementById('container'))
+  React.renderComponent(`<Game bindTo={game.onValue} push={game.pushCoords} />`, document.getElementById('game-container'))

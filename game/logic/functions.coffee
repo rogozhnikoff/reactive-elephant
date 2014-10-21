@@ -20,6 +20,7 @@ toFront = (state, tasks, desk) ->
       )()
     desk: desk
   }
+
 $.ajax('game/logic/fixture.json').done (data) ->
   state = data.elephant
   tasks = data.tasks

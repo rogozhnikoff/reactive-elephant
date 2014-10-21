@@ -3,14 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Elephant game</title>
+    <link rel="stylesheet/less" href="bower_components/bootstrap/less/bootstrap.less"/>
+    <link rel="stylesheet/less" href="game/styles/elephant.less"/>
 
+    <script src="bower_components/less/dist/less-1.7.5.min.js"></script>
+    <script src="bower_components/lodash/dist/lodash.js"></script>
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/bacon/dist/Bacon.js"></script>
+    <script src="bower_components/react/react-with-addons.js"></script>
 </head>
-<body id="container">
-<script src="bower_components/lodash/dist/lodash.js"></script>
-<script src="bower_components/jquery/dist/jquery.js"></script>
-<script src="bower_components/bacon/dist/Bacon.js"></script>
-<script src="bower_components/react/react.js"></script>
-<script src="build/logic/elephant.js"></script>
-<script src="build/logic/functions.js"></script>
+<body>
+<div id="game-container"></div>
+
+<!--<script src="build/logic/elephant.js"></script>-->
+<!--<script src="build/logic/functions.js"></script>-->
+
+<script src="build/helper/view-all.js"></script>
+
+<script src="build/view/game.jsx.js"></script>
+<script src="build/view/elephant.jsx.js"></script>
+<script src="build/view/desk.jsx.js"></script>
+<script src="build/view/tile.jsx.js"></script>
+<script src="build/view/tasks.jsx.js"></script>
 </body>
 </html>
