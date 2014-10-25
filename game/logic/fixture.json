@@ -1,7 +1,6 @@
 {
     "elephant": {
-        "x": 0,
-        "y": 0,
+        "position": [0,0],
         "taskIndex": 0,
         "status": "start"
     },
