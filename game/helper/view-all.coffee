@@ -1,5 +1,7 @@
 __ = {}
 
+React.PropTypes.arrayOfNumber = React.PropTypes.arrayOf(React.PropTypes.number)
+
 __.prepareStylesToDom = (styles) ->
   return _(styles).reduce((acc, value, key) ->
     if typeof value is 'number' and value isnt 0
@@ -14,7 +16,7 @@ __.getCoordsFromPoint = (pos, sizeX) ->
   ]
 
 __.getObjectByCoords = (objects, coords) ->
-  return objects.find (object) ->
+  return _(objects).find (object) ->
     return _.isEqual(object.coords, coords)
 
 __.getShadows = ({left, top, long}) ->
@@ -41,10 +43,10 @@ __.getShadows = ({left, top, long}) ->
       position: [LEFT + 1, TOP + 1]
       percent: (1 - LEFTp) * (1 - TOPp)
     }
-  ], 'percent').value()
+  ], 'percent')
 
 
-__.getRelativePosition = (child, parent) ->
+__.getRelativePosition = ({child, parent}) ->
   return {
     top: child.offsetTop - parent.offsetTop
     left: child.offsetLeft - parent.offsetLeft

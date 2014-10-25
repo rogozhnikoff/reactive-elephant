@@ -1,6 +1,6 @@
 `/** @jsx React.DOM */`
 
-Tasks = React.createClass
+@Tasks = React.createClass
   propTypes:
     model: React.PropTypes.arrayOf(React.PropTypes.shape({
       type: String
@@ -20,9 +20,9 @@ Tasks = React.createClass
       'task-left': task.type is 'left'
       'task-down': task.type is 'down'
 
-    return `<i class={classSet} />`
+    return `<i className={classSet} />`
 
   render: ->
-    return `<div class='tasks'>
+    return `<div className='tasks'>
         {this.props.model.map(this.createTask)}
       </div>`

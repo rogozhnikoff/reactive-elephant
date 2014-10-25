@@ -3,7 +3,28 @@
   -khtml-user-select: none;
   -webkit-user-select: none;
   user-select: none;
+
   /* Required to make elements draggable in old WebKit */
   -khtml-user-drag: element;
   -webkit-user-drag: element;
+}
+
+.desk {
+  position: relative;
+}
+
+.tile {
+  position: absolute;
+  border: 1px solid gray;
+}
+
+.object {
+  max-width: 100%;
+}
+
+.elephant {
+  position: absolute;
+  background: pink;
+  left: 0;
+  top: 0;
 }

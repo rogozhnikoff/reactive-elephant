@@ -1,27 +1,26 @@
 `/** @jsx React.DOM */`
-
-
-Tile = React.createClass
+@Tile = React.createClass
   propTypes:
-    tilePx: Number
-    coords: React.PropTypes.arrayOf(Number)
+    tilePx: React.PropTypes.number
+    coords: React.PropTypes.arrayOfNumber
     highlight: React.PropTypes.shape
-      position: React.PropTypes.arrayOf(Number)
-      percent: Number
+      position: React.PropTypes.arrayOfNumber
+      percent: React.PropTypes.number
 
     object: React.PropTypes.shape
       type: React.PropTypes.oneOf([
         'animal'
         'block'
       ])
-      img: String
-      name: String
-      coords: React.PropTypes.arrayOf(Number)
+      img: React.PropTypes.string
+      name: React.PropTypes.string
+      coords: React.PropTypes.arrayOfNumber
 
   getInitialState: ->
     return {
       highlight: off,
       hasObject: @props.object?
+      isHover: no
     }
 
   classSet: ->
@@ -33,14 +32,24 @@ Tile = React.createClass
 
   getStyles: ->
     {tilePx, coords, highlight} = @props
+    {isHover} = @state
 
     return {
       left: coords[0] * tilePx
       top: coords[1] * tilePx
       width: tilePx
       height: tilePx
-      backgroundColor: "rgba(0, 0, 0, #{(highlight.percent * .5) / 100})"
+      borderColor: if isHover then 'red' else 'black'
+      backgroundColor: if highlight? then "rgba(255, 192, 203, #{highlight.percent})" else null
     }
+
+  onMouseEnter: (ev) ->
+    @setState
+      isHover: yes
+
+  onMouseLeave: (ev) ->
+    @setState
+      isHover: no
 
   renderObject: ->
     {object} = @props
@@ -51,18 +60,22 @@ Tile = React.createClass
       'object-animal': object.type is 'animal'
       'object-block': object.type is 'block'
 
+    img = "static/image/object/#{object.img || 'empty'}.gif"
+
     return `<img
-        class={classSet}
+        className={classSet}
         alt={object.name}
-        src={object.img}
+        src={img}
         />`
 
   render: ->
     object = @renderObject() || ''
 
     return `<div
-      class={this.classSet()}
-      style={this.getStyles()}
+        className={this.classSet()}
+        style={this.getStyles()}
+        onMouseEnter={this.onMouseEnter}
+        onMouseLeave={this.onMouseLeave}
       >
       {object}
     </div>`

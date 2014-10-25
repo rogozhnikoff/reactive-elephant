@@ -1,13 +1,14 @@
 `/** @jsx React.DOM */`
 
-Game = React.createClass
+@Game = React.createClass
   propTypes:
-    bind: React.PropTypes.func
+    bindTo: React.PropTypes.func
     push: React.PropTypes.func
 
   componentWillMount: ->
     @props.bindTo((data) =>
-      @setState _.extend({}, data, {dataTaken: yes})
+      state = _.extend({}, data, {dataTaken: yes})
+      @setState(state)
     )
 
     window.addEventListener('resize', @handleResize.bind(@))
@@ -18,33 +19,6 @@ Game = React.createClass
     return {
       dataTaken: no
       wSizePx: @getWindowSizePx()
-
-      # fixture
-      elephant: {
-        coords: [0, 1]
-        status: ''
-      }
-      desk: {
-        size: [0, 1]
-        objects: [
-          {
-            type: 'animal' || 'block'
-            img: '<img />'
-            name: ''
-            coords: [0, 1]
-          }
-          '...'
-        ]
-      }
-      tasks: [
-        {
-          type: 'right'
-          visited: true
-          current: false
-        }
-        '...'
-      ]
-
     }
 
   getSizesPx: () ->
@@ -71,10 +45,14 @@ Game = React.createClass
     @setState wSizePx: @getWindowSizePx()
     return @
 
-  dragElephant: ({type, elephantEl}) ->
+  dragElephant: ({type, elephantOffset}) ->
     # should we cached this params?
-    tilePx = @getSizes().tile
-    position = __.getRelativePosition(elephantEl, @refs.desk.getDOMNode())
+    tilePx = @getSizesPx().tile
+
+    position = __.getRelativePosition
+      parent: @refs.desk.getPosition()
+      child: elephantOffset
+
     shadows = __.getShadows
       left: position.left
       top: position.top
@@ -96,8 +74,8 @@ Game = React.createClass
     {desk, elephant, tasks} = @state
     sizesPx = @getSizesPx()
 
-    return `<div class={this.classSet()}>
 
+    return `<div className={this.classSet()}>
         <Desk
           ref='desk'
           size={desk.size}
@@ -119,13 +97,6 @@ Game = React.createClass
 
       </div>`
 
-
-
-
-class Game
-  onValue: -> console.log('onValue')
-  pushCoords: -> console.log('pushCoords')
-
 do ->
-  game = new Game()
-  React.renderComponent(`<Game bindTo={game.onValue} push={game.pushCoords} />`, document.getElementById('game-container'))
+  core = new Core()
+  React.renderComponent(`<Game bindTo={core.onValue} push={core.pushCoords} />`, document.getElementById('game-container'))
