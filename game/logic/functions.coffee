@@ -79,7 +79,7 @@ $.ajax('game/logic/fixture.json').done (data) ->
 
   okStream = possibleMoves.filter (ev) -> Vector2d.isEqual ev.newCoords, Vector2d.add(ev.oldCoords, ev.taskDirection)
     .map (ev) ->
-      {c
+      {
       taskIndex: 1
       status: 'Ok'
       position: ev.newCoords
@@ -97,7 +97,13 @@ $.ajax('game/logic/fixture.json').done (data) ->
       }
     .toEventStream()
 
-  toFar.merge(mistake).merge(okStream)
+  toFar.merge(mistake).merge(okStream).scan initialState, (a,b) ->
+      {
+      taskIndex: a.taskIndex + b.taskIndex
+      status: b.status
+      position: Vector2d.add(a.position, b.position)
+      timeStamp: b.timeStamp
+      }
     .onValue (data) ->
       console.log '----', 'summary', data
       #state.push data
