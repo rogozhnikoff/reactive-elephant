@@ -12,36 +12,46 @@
       shadows: []
     }
 
+  render: ->
+    {size} = @props
+
+    return `<div style={this.styleSet()} className={this.classSet()}>
+        {_(size[0] * size[1]).times(this.createTile.bind(this)).value()}
+    </div>`
+
+  createTile: (n) ->
+    {tilePx} = @props
+    {size, shadows} = @state
+
+    return `<Tile
+      ref={'tile-' + n}
+      key={n}
+
+      tilePx={tilePx}
+      sizeDeskX={size[0]}
+
+      getShadow={this.getShadow}
+      getObject={this.getObject}
+    />`
+
+  styleSet: ->
+    {deskPx} = @props
+    return _.extend {}, deskPx, {
+      # ... styles
+    }
+
   # todo: it must be cached
   getPosition: ->
     {offsetTop, offsetLeft} = @getDOMNode()
     return {offsetTop, offsetLeft}
 
-  createTile: (n) ->
-    {objects, size, tilePx} = @props
-    {shadows} = @state
+  getShadow: ({coords}) ->
+    return _(@state.shadows).find (shadow) -> _.isEqual(shadow.position, coords)
 
-    tyleCoords = __.getCoordsFromPoint(n, size[0])
-    highlight = _(shadows).find((shadow) -> _.isEqual(shadow.position, tyleCoords))
-    object = __.getObjectByCoords(objects, tyleCoords)
+  getObject: ({coords}) ->
+    return __.getObjectByCoords(@props.objects, coords)
 
-    return `<Tile
-      ref={'tile-' + n}
-      tilePx={tilePx}
-      coords={tyleCoords}
-      object={object}
-      highlight={highlight}
-      />`
 
   classSet: ->
     React.addons.classSet
       'desk': yes
-
-  render: ->
-    {size, deskPx} = @props
-
-    tiles = _(size[0] * size[1]).times(@createTile.bind(@)).value()
-
-    return `<div style={deskPx} className={this.classSet()}>
-        {tiles}
-      </div>`

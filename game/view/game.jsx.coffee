@@ -6,25 +6,17 @@
     push: React.PropTypes.func
 
   componentWillMount: ->
-    @props.bindTo((data) =>
-      state = _.extend({}, data, {dataTaken: yes})
-      @setState(state)
+    @props.bindTo((data) => # ownInitialState
+      @setState _.extend {}, data, {
+        dataTaken: yes
+      }
     )
 
     window.addEventListener('resize', @handleResize.bind(@))
 
     return @
 
-  getInitialState: ->
-    return {
-      dataTaken: no
-      wSizePx: @getWindowSizePx()
-    }
-
-  getSizesPx: () ->
-    {size} = @state.desk
-    {wSizePx} = @state
-
+  getSizesPx: _.memoize(({size, wSizePx}) ->
     tileSizePx = Math.min(wSizePx.height / size[1], wSizePx.width / size[0])
 
     return {
@@ -34,6 +26,17 @@
 
       tile: tileSizePx
     }
+  , ->
+    # theoretically, is's must be fast prevent to compute sizes, based on window-size
+    return btoa(JSON.stringify(arguments)) # base64 hash of arguments, for key to memoize return
+  )
+
+  getInitialState: ->
+    return {
+      dataTaken: no
+      wSizePx: @getWindowSizePx()
+    }
+
 
   getWindowSizePx: ->
     return {
@@ -42,10 +45,11 @@
     }
 
   handleResize: ->
-    @setState wSizePx: @getWindowSizePx()
+    @setState
+      wSizePx: @getWindowSizePx()
     return @
 
-  dragElephant: ({type, elephantOffset}) ->
+  dragElephant: _.throttle(({type, elephantOffset}) ->
     # should we cached this params?
     tilePx = @getSizesPx().tile
 
@@ -60,9 +64,15 @@
 
     @refs.desk.setState({shadows})
 
-    @props.push shadows[0].position if type is 'end'
+    if type is 'end'
+      @props.push {
+        position: ''
+        newPosition: shadows[0].position
+        task: ''
+      }
 
     return @
+  , 1000 / 25)
 
   classSet: ->
     return React.addons.classSet
@@ -70,8 +80,10 @@
 
   render: ->
     return `<div>Loading...</div>` unless @state.dataTaken
+    {desk, elephant, tasks, size, wSizePx} = @state
 
-    {desk, elephant, tasks} = @state
+    sizes = @getSizesPx {size, wSizePx}
+
     sizesPx = @getSizesPx()
 
 

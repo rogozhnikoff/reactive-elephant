@@ -2,19 +2,14 @@
 @Tile = React.createClass
   propTypes:
     tilePx: React.PropTypes.number
-    coords: React.PropTypes.arrayOfNumber
+    sizeDeskX: React.PropTypes.number
+    shadows: React.PropTypes.array
     highlight: React.PropTypes.shape
       position: React.PropTypes.arrayOfNumber
       percent: React.PropTypes.number
 
-    object: React.PropTypes.shape
-      type: React.PropTypes.oneOf([
-        'animal'
-        'block'
-      ])
-      img: React.PropTypes.string
-      name: React.PropTypes.string
-      coords: React.PropTypes.arrayOfNumber
+    getObject: React.PropTypes.func
+    getShadow: React.PropTypes.func
 
   getInitialState: ->
     return {
@@ -22,6 +17,17 @@
       hasObject: @props.object?
       isHover: no
     }
+
+  componentWillMount: ->
+    {key, sizeDeskX} = @props
+
+    console.log '123', __.getCoordsFromPoint(key, sizeDeskX)
+    @setState
+      coords: __.getCoordsFromPoint(key, sizeDeskX)
+
+  componentWillReceiveProps: ->
+#    @setState:
+#      highlight:
 
   classSet: ->
     return React.addons.classSet
@@ -31,8 +37,10 @@
       'is-highlight': @state.highlight?
 
   getStyles: ->
-    {tilePx, coords, highlight} = @props
-    {isHover} = @state
+    {tilePx, highlight} = @props
+    {isHover, coords} = @state
+
+    highlight = @props.getShadow({coords})
 
     return {
       left: coords[0] * tilePx
@@ -52,13 +60,15 @@
       isHover: no
 
   renderObject: ->
-    {object} = @props
+    {isHover, coords} = @state
+    object = @props.getObject({coords})
     return unless object?
 
     classSet = React.addons.classSet
       'object': yes
       'object-animal': object.type is 'animal'
       'object-block': object.type is 'block'
+      'object-hover': isHover
 
     img = "static/image/object/#{object.img || 'empty'}.gif"
 
