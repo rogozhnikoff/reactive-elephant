@@ -22,7 +22,7 @@ class Vector2d
   @add: (a, b) -> new Vector2d(a.x + b.x, a.y + b.y)
 
   # distance :: Coords -> Int
-  @distance: (a) -> Math.pow(a.x, 2) + Math.pow(a.y, 2)
+  @distance: (a,b) -> Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2)
 
   @isEqual: (a, b) -> a.x == b.x && a.y == b.y
 
@@ -50,44 +50,66 @@ toFront = (state, tasks, desk) ->
   }
 
 $.ajax('game/logic/fixture.json').done (data) ->
-  tasks = data.tasks
-  states = [{
-    position: Vector2d.fromArray data.elephant.position
-    taskIndex: data.elephant.taskIndex
-    status: data.elephant.status
-    time: new Date()
-  }]
-  ###
-  # fromMurad :: Bus[Array[Int]]
-  fromMurad = new Bacon.Bus()
+  initialState = _.extend(data.elephant, {time: new Date(), position: Vector2d.fromArray(data.elephant.position)})
 
-  fromMurad.flatMap (coords) -> Bacon.fromArray coords
 
-  # stepNumber :: Bus[Int]
-  window.stepNumber = new Bacon.Bus()
-
-  # task :: EventStream[Task]
-  task = stepNumber.map (step) ->  data.tasks[step]
-
-  # Bus[Array[Int]]
-  window.mainstream = new Bacon.Bus()
-
-  # EventStream[Vector2d]
-  window.coords = mainstream.map(Vector2d.fromArray)
-
-  state = (new Bacon.Bus())
-    .toProperty _.extend(data.elephant, {time: new Date()})
-
-  lastOp = () -> Vector2d.fromString(tasks[_.last(state).taskIndex])
-  ###
-
-  # fromMurad :: Bus[Array[Int]]
   window.fromMurad = new Bacon.Bus()
+  state = (new Bacon.Bus()).toProperty(initialState)
 
+  steps = fromMurad.map((newCoords) -> Vector2d.fromArray(newCoords)).combine(state, (a,b) ->
+    newCoords: a
+    oldCoords: b.position
+    taskDirection: Vector2d.fromString data.tasks[b.taskIndex]
+  )
+
+  toFar = steps.filter (ev) -> Vector2d.distance(ev.oldCoords, ev.newCoords) > 1
+    .map (ev) ->
+      message = switch Vector2d.distance(ev.oldCoords, ev.newCoords)
+        when 2 then 'diagonal'
+        else 'to far'
+      {
+        taskIndex: 0
+        status: message
+        position: Vector2d.zero()
+        timeStamp: new Date()
+      }
+    .toEventStream()
+
+  possibleMoves = steps.filter (ev) -> Vector2d.distance(ev.oldCoords, ev.newCoords) is 1
+
+  okStream = possibleMoves.filter (ev) -> Vector2d.isEqual ev.newCoords, Vector2d.add(ev.oldCoords, ev.taskDirection)
+    .map (ev) ->
+      {c
+      taskIndex: 1
+      status: 'Ok'
+      position: ev.newCoords
+      timeStamp: new Date()
+      }
+    .toEventStream()
+
+  mistake = possibleMoves.filter (ev) -> !Vector2d.isEqual ev.newCoords, Vector2d.add(ev.oldCoords, ev.taskDirection)
+    .map (ev) ->
+      {
+      taskIndex: 1
+      status: 'not your task'
+      position: ev.newCoords
+      timeStamp: new Date()
+      }
+    .toEventStream()
+
+  toFar.merge(mistake).merge(okStream)
+    .onValue (data) ->
+      console.log '----', 'summary', data
+      #state.push data
+
+  ###
   stepsStream = fromMurad.map(Vector2d.fromArray)
   okStream =
     stepsStream
-      .filter ((ev) -> Vector2d.fromString(tasks[_.last(states).taskIndex]).equals(ev))
+      .filter ((ev1,ev2) ->
+        console.log '----', ev1,ev2
+        Vector2d.fromString(tasks[_.last(states).taskIndex]).equals(ev1)
+      )
       .map( (vector) ->
         {
           position: vector
@@ -96,7 +118,7 @@ $.ajax('game/logic/fixture.json').done (data) ->
           time: new Date()
         })
 
-  stepsStream
+  state = stepsStream
     .filter((ev) -> Vector2d.fromString(tasks[_.last(states).taskIndex]).notEquals(ev))
     .map (vector) ->
       message = switch Vector2d.distance vector
@@ -109,7 +131,6 @@ $.ajax('game/logic/fixture.json').done (data) ->
         status: message
         time: new Date()
       }
-
     .merge(okStream)
     .scan(states[0], (obj1, obj2) ->
       {
@@ -118,8 +139,12 @@ $.ajax('game/logic/fixture.json').done (data) ->
       status: obj2.status
       time: obj2.time
       }
-    ).onValue((obj) ->
+    )
+
+  state.onValue((obj) ->
+        console.log '----', 133, obj.position
         states.push obj
-        console.log '----', 123, obj
         toFront(obj,tasks,data.desk)
     )
+
+  ###
